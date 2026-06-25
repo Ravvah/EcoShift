@@ -8,3 +8,20 @@ wheels/
 
 # Virtual environments
 .venv
+
+/token
+
+.history
+
+/output
+
+/old_project
+/data
+
+*.csv
+*.ipynb
+*.html
+
+/mlruns
+*.db
+/catboost_info

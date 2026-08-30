@@ -3,8 +3,8 @@ import logging
 
 import pandas as pd
 
-from ecoshift.forecaster.app.api.schemas.request import PredictionRequest
-from ecoshift.forecaster.app.api.schemas.response import ForecastDataPoint, PredictResponse
+from ecoshift.forecaster.app.schemas.request import PredictionRequest
+from ecoshift.forecaster.app.schemas.response import ForecastDataPoint, PredictResponse
 from ecoshift.forecaster.app.core.config import settings
 from ecoshift.forecaster.model.forecaster import EnergyForecaster
 

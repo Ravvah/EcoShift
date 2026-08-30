@@ -1,0 +1,1 @@
+#TODO: Implement the global v1 router with his endpoints.

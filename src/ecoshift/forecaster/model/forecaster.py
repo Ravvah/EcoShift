@@ -13,7 +13,6 @@ from ecoshift.forecaster.features.features import FeatureEngineer
 logger = logging.getLogger(__name__)
 
 class EnergyForecaster:
-
     def __init__(self, target_col: str, model: BaseEstimator):
         self.target_col = target_col
         self.model = model

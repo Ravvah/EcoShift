@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     API_KEY: str = None
 
     MODEL_PATH: Path = Field(default=Path("artifacts/forecaster_model.joblib"), description="Artifact mode path of the forecaster")
-    MINIMUM_HISTORY_HOURS: int = Field(default=168, description="Minimum number of hours to do a prediction")
+    MINIMUM_HISTORY_POINTS: int = Field(default=336, description="Minimum number of hours to do a prediction")
 
     ALLOWED_HOSTS: List[str] = Field(default=["*"], description="Origin list authorized for HTTP requests")
 
@@ -25,9 +25,14 @@ class Settings(BaseSettings):
     @field_validator("MODEL_PATH")
     @classmethod
     def validate_model_path_exists(cls, v: Path) -> Path:
-        if not v.exists():
-            logger.error(f"Model artefact not found in : {v.absolute()}")
-            raise
+        absolute_path = v.resolve()
+
+        if not absolute_path.exists():
+            raise FileNotFoundError(f"ML model artifact not found at : {absolute_path}")
+
+        if not absolute_path.is_file():
+            raise ValueError(f"The given model path is not a file path : {absolute_path}")
+        
         return v
 
 

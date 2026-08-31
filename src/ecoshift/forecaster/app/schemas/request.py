@@ -10,5 +10,5 @@ class EnergyDataPoint(BaseModel):
 
 class PredictionRequest(BaseModel):
     horizon_hours: int = Field(default=24, ge=1, le=168, description="Forecasting horizon in hours")
-    history: List[EnergyDataPoint] = Field(..., min_length=168, description="History required (7 days minimum) for a prediction")
+    history: List[EnergyDataPoint] = Field(..., min_length=336, description="History required (7 days minimum) for a prediction")
 

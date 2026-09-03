@@ -26,13 +26,19 @@ class Tuner:
             forecaster = EnergyForecaster(target_col=target_col, model=model)
             cv_report = self.trainer.cross_validate(df, forecaster)
 
-            mae = cv_report.mean_metrics["mae"]
-            pinball_q_90 = cv_report.mean_metrics["pinball__q_90"]
+            # rmse is better for optimizer service allocation than mae
+            rmse = cv_report.mean_metrics["rmse"]
+            wape = cv_report.mean_metrics["wape"]
+            # mae = cv_report.mean_metrics["mae"]
 
-            return mae + (self.quantile_weight * pinball_q_90)
+            if self.quantile_weight > 0 and "pinball__q_90" in cv_report.mean_metrics:
+                pinball_q_90 = cv_report.mean_metrics["pinball__q_90"]
+                return rmse + (self.quantile_weight * pinball_q_90)
+            
+            return rmse + 0.1 * wape
 
         logger.info(f"Running HPO for model {model_name} on {self.n_trials} trials ...")
-        study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler)
+        study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=42))
         study.optimize(objective, n_trials=self.n_trials, timeout=self.timeout)
 
         logger.info(f"Best composite score : {model_name} : {study.best_value:.4f}")

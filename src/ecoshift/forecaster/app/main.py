@@ -23,7 +23,12 @@ async def lifespan(app: FastAPI):
     logger.info("Starting the ecoshift forecaster service...")
 
     predictor_service = PredictorService()
-
+    try:
+        predictor_service.load_and_warmup()
+    except Exception as e:
+        logger.critical(f"Loading & Warm up Failed : Could not prepare the models : {e}")
+        raise e
+    
     yield
 
     logger.info("Stoping the ecoshift forecaster service")

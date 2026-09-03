@@ -12,7 +12,7 @@ def get_predictor_service() -> PredictorService:
     if predictor_service is None:
         raise HTTPException(
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Prediction service is not ready."
+            detail="Inference service is not ready."
         )
     return predictor_service
 
@@ -21,11 +21,11 @@ def get_predictor_service() -> PredictorService:
         response_model=PredictResponse,
         status_code=status.HTTP_200_OK,
         dependencies=[Depends(verify_api_key)],
-        summary="Generate a prediction of the electricity price"
+        summary="Generate a prediction of the energy : electricity price and co2 quantity"
 )
-def predict_prices(request: PredictionRequest, service: PredictorService = Depends(get_predictor_service)) -> PredictResponse:
+async def predict_energy_signals(request: PredictionRequest, service: PredictorService = Depends(get_predictor_service)) -> PredictResponse:
     try:
-        return service.predict(request=request)
+        return await service.predict(request=request)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

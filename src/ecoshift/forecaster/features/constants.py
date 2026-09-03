@@ -2,8 +2,8 @@
 TARGET_PRICE = "price_eur_mwh"
 TARGET_CO2 = "co2_intensity_g_kwh"
 
-LAGS = [1, 2, 24, 48, 168] 
+LAGS_30MIN = [1, 2, 4, 48, 96, 336]
 
-ROLLING_WINDOWS = [6, 24] 
+ROLLING_WINDOWS_30MIN = [4, 12, 48]
 
 COUNTRY_CODE = "FR"

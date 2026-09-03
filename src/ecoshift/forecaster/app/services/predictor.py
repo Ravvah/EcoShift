@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PredictorService:
 
     def __init__(self):
-        model_path = settings.MODEL_PATH
+        model_path = settings.PRICE_MODEL_PATH.parent
         logger.info(f"Loading the ML model artifact from {model_path} ...")
 
         self.price_forecaster = EnergyForecaster.load(settings.PRICE_MODEL_PATH)
@@ -30,7 +30,7 @@ class PredictorService:
         self.co2_forecaster = EnergyForecaster.load(settings.CO2_MODEL_PATH)          
 
         dummy_dates = pd.date_range(end=pd.Timestamp.now(), periods=settings.MINIMUM_HISTORY_POINTS, freq="30min")
-        dummy_df = pd.DataFrame({"price_eur_mwh": [50.0] * settings.MINIMUM_HISTORY_POINTS}, index=dummy_dates)
+        # dummy_df = pd.DataFrame({"price_eur_mwh": [50.0] * settings.MINIMUM_HISTORY_POINTS}, index=dummy_dates)
 
         dummy_df = self._generate_dummy_history()
 
@@ -41,11 +41,11 @@ class PredictorService:
 
 
     def _generate_dummy_history(self) -> pd.DataFrame:
-        dates = pd.date_range(end=pd.Timestamp.now(), periods=336, freq="30min")
+        dates = pd.date_range(end=pd.Timestamp.now(), periods=384, freq="30min")
         return pd.DataFrame(
             {
-                "price_eur_mwh": [50.0] * 336,
-                "co2_g_kwh": [20.0] * 336,
+                "price_eur_mwh": [50.0] * 384,
+                "co2_intensity_g_kwh": [20.0] * 384,
             },
             index=dates,
         )

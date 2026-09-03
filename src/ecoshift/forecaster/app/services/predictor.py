@@ -29,14 +29,12 @@ class PredictorService:
         self.price_forecaster = EnergyForecaster.load(settings.PRICE_MODEL_PATH)
         self.co2_forecaster = EnergyForecaster.load(settings.CO2_MODEL_PATH)          
 
-        dummy_dates = pd.date_range(end=pd.Timestamp.now(), periods=settings.MINIMUM_HISTORY_POINTS, freq="30min")
-        # dummy_df = pd.DataFrame({"price_eur_mwh": [50.0] * settings.MINIMUM_HISTORY_POINTS}, index=dummy_dates)
-
         dummy_df = self._generate_dummy_history()
 
         logger.info("Execution of models warm-ups...")
         _ = self.price_forecaster.predict(dummy_df)
         _ = self.co2_forecaster.predict(dummy_df)
+        self._is_healthy = True
         logger.info("Warm-up prediction completed successfully (30min freq).")
 
 

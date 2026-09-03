@@ -14,12 +14,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-predictor_service: Optional[PredictorService] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global predictor_service
-
     logger.info("Starting the ecoshift forecaster service...")
 
     predictor_service = PredictorService()
@@ -29,10 +26,11 @@ async def lifespan(app: FastAPI):
         logger.critical(f"Loading & Warm up Failed : Could not prepare the models : {e}")
         raise e
     
+    app.state.predictor_service = predictor_service
     yield
 
     logger.info("Stoping the ecoshift forecaster service")
-    predictor_service = None
+    app.state.predictor_service = None
 
 
 app = FastAPI(

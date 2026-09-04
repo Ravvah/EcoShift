@@ -8,6 +8,7 @@ dependencies = [
     "fastapi>=0.141.1",
     "gunicorn>=26.1.0",
     "holidays>=0.103",
+    "httpx>=0.28.1",
     "lightgbm>=4.7.0",
     "matplotlib>=3.11.0",
     "mlflow>=1.27.0",

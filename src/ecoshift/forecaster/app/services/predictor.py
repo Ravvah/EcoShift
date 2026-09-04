@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import List
 
@@ -99,7 +99,28 @@ class PredictorService:
             tg.start_soon(run_price)
             tg.start_soon(run_co2)
 
+        horizon_steps = request.horizon_hours * 2
+        last_timestamp = df_history.index[-1]
 
+        forecast_points = []
+        for step in range(1, horizon_steps + 1):
+            future_timestamp = last_timestamp + timedelta(minutes=30 * step)
+
+            forecast_points.append(
+                ForecastDataPoint(
+                    timestamp=future_timestamp,
+                    predicted_price_eur_mwh=price_preds[step - 1],
+                    predicted_co2_g_kwh=co2_preds[step - 1],
+                    q10_price_eur_mwh=None,
+                    q90_price_eur_mwh=None
+                )
+            )
+
+        return PredictResponse(
+            model_version="1.0.0",
+            generated_at=datetime.now(timezone.utc),
+            predictions=forecast_points
+        )
 
 
  

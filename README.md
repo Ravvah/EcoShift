@@ -1,4 +1,4 @@
-# EcoShift – Smart Industrial Load Shifting
+# EcoShift - Smart Industrial Load Shifting
 
 EcoShift is an in-progress platform for intelligent industrial task scheduling.  
 Its goal is to minimize **electricity costs** and **CO2 emissions** while respecting strict operational constraints such as **deadlines** and **maximum available power**.

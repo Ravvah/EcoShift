@@ -10,6 +10,7 @@ from ecoshift.forecaster.app.schemas.request import PredictionRequest
 from ecoshift.forecaster.app.schemas.response import ForecastDataPoint, PredictResponse
 from ecoshift.forecaster.app.core.config import settings
 from ecoshift.forecaster.model.forecaster import EnergyForecaster
+from ecoshift.forecaster.tracking.mlflow_tracker import MLflowTracker
 
 logger = logging.getLogger(__name__)
 
@@ -19,15 +20,27 @@ class PredictorService:
         model_path = settings.PRICE_MODEL_PATH.parent
         logger.info(f"Loading the ML model artifact from {model_path} ...")
 
-        self.price_forecaster = EnergyForecaster.load(settings.PRICE_MODEL_PATH)
-        self.co2_forecaster = EnergyForecaster.load(settings.CO2_MODEL_PATH)        
+        self.price_forecaster = None
+        self.co2_forecaster = None       
         self._is_healthy: bool = False
+        self.mlflow_tracker = MLflowTracker(experiment_name=settings.MLFLOW_EXPERIMENT_NAME, tracking_uri=settings.MLFLOW_TRACKING_URI)
 
 
     def load_and_warmup(self) -> None:
         logger.info("Loading forecasting models...")
-        self.price_forecaster = EnergyForecaster.load(settings.PRICE_MODEL_PATH)
-        self.co2_forecaster = EnergyForecaster.load(settings.CO2_MODEL_PATH)          
+        self.price_forecaster = (
+                self.mlflow_tracker.load_model_from_registry(
+                    model_name=settings.MLFLOW_PRICE_MODEL_NAME,
+                    stage_or_alias=settings.MLFLOW_MODEL_STAGE,
+                )
+            )
+
+        self.co2_forecaster = (
+                self.mlflow_tracker.load_model_from_registry(
+                    model_name=settings.MLFLOW_CO2_MODEL_NAME,
+                    stage_or_alias=settings.MLFLOW_MODEL_STAGE,
+                )
+            )         
 
         dummy_df = self._generate_dummy_history()
 

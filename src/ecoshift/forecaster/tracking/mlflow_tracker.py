@@ -4,9 +4,11 @@ from typing import Generator
 import logging
 import mlflow
 from mlflow.tracking import MlflowClient
+from mlflow.pyfunc import PyFuncModel
 
 from ecoshift.forecaster.model.forecaster import EnergyForecaster
 from ecoshift.forecaster.model.trainer import CrossValidationReport
+from ecoshift.forecaster.tracking.pyfunc_wrapper import EnergyForecasterPyfuncWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -52,30 +54,53 @@ class MLflowTracker:
             mlflow.log_metrics(fold_metrics)
 
 
-    def log_model_artifact(self, forecaster: EnergyForecaster, artifact_path: str, model_name_registry: str) -> None:
-        artifact_path = Path(artifact_path)
-        artifact_dir = "serialized_model"
-        forecaster.save(artifact_path)
+    # def log_model_artifact(self, forecaster: EnergyForecaster, artifact_path: str, model_name_registry: str) -> None:
+    #     artifact_path = Path(artifact_path)
+    #     artifact_dir = "artifacts"
+    #     forecaster.save(artifact_path)
 
-        mlflow.log_artifact(artifact_path, artifact_path=artifact_dir)
+    #     mlflow.log_artifact(artifact_path, artifact_path=artifact_dir)
 
-        model_uri = f"runs:/{mlflow.active_run().info.run_id}/{artifact_dir}/{Path(artifact_path).name}"
+    #     model_uri = f"runs:/{mlflow.active_run().info.run_id}/{artifact_dir}/{Path(artifact_path).name}"
+
+    #     try:
+    #         model_version = mlflow.register_model(model_uri=model_uri, name=model_name_registry)
+    #         logger.info(f"Model saved in MLflow Registry with name : '{model_name_registry}' in {model_uri} "
+    #                     f"Model version : {model_version.version}"
+    #                     )
+
+    #         self.client.transition_model_version_stage(
+    #             name=model_name_registry,
+    #             version=model_version.version,
+    #             stage="staging",
+    #             archive_existing_versions=False
+    #         )
+    #     except Exception as e:
+    #         logger.error(f"Error when saving model to MLflow Registry : {e}")
+    #         raise
+        
+
+    def log_model_native(self, forecaster: EnergyForecaster, model_name_registry: str) -> None:
+        model_info = mlflow.pyfunc.log_model(artifact_path="model", python_model=EnergyForecasterPyfuncWrapper(forecaster), registered_model_name=model_name_registry)
+        logger.info(f"Model registered natively in MLflow Registry '{model_name_registry}' at URI : {model_info.model_uri}")
+
+        latest_version = str(model_info.registered_model_version)
+        self.client.set_registered_model_alias(name=model_name_registry, version=latest_version, alias="staging")
+        logger.info(f"Model version {latest_version} assigned alis '@staging'")
+
+
+    def load_model_from_registry(self, model_name: str, alias: str = "production") -> PyFuncModel:
+        model_uri = f"models:/{model_name}@{alias}"
+        logger.info(f"Loading model from MLflow Registry : {model_uri} ...")
 
         try:
-            model_version = mlflow.register_model(model_uri=model_uri, name=model_name_registry)
-            logger.info(f"Model saved in MLflow Registry with name : '{model_name_registry}' in {model_uri} "
-                        f"Model version : {model_version.version}"
-                        )
+            model = mlflow.pyfunc.load_model(model_uri=model_uri)
+            logger.info(f"Successfully loaded model '{model_name}' (@{alias})")
+            return model
 
-            self.client.transition_model_version_stage(
-                name=model_name_registry,
-                version=model_version.version,
-                stage="staging",
-                archive_existing_versions=False
-            )
         except Exception as e:
-            logger.error(f"Error when saving model to MLflow Registry : {e}")
-            raise
+            logger.error(f"Failed to load model '{model_name}' (@{alias}) from MLflow Registry: {e}")
+            raise e
 
 
 

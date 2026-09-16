@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     PRICE_MODEL_PATH: Path = Field(default=Path("artifacts/price_model.joblib"), description="Artifact model path of the electricity price forecasting")
     CO2_MODEL_PATH: Path = Field(default=Path("artifacts/co2_model.joblib"), description="Artifact model path of the co2 quantity forecasting")
 
+
+    MLFLOW_TRACKING_URI: str = "sqlite:///mlflow.db"
+    MLFLOW_EXPERIMENT_NAME: str = "ecoshift-forecaster"
+    MLFLOW_PRICE_MODEL_NAME: str = "forecaster_price_model"
+    MLFLOW_CO2_MODEL_NAME: str = "forecaster_co2_model"
+    MLFLOW_MODEL_STAGE: str = "staging"  
+
     MINIMUM_HISTORY_POINTS: int = Field(default=336, description="Minimum number of hours to do a prediction")
 
     ALLOWED_HOSTS: List[str] = Field(default=["*"], description="Origin list authorized for HTTP requests")

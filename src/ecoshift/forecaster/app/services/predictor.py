@@ -31,14 +31,14 @@ class PredictorService:
         self.price_forecaster = (
                 self.mlflow_tracker.load_model_from_registry(
                     model_name=settings.MLFLOW_PRICE_MODEL_NAME,
-                    stage_or_alias=settings.MLFLOW_MODEL_STAGE,
+                    alias=settings.MLFLOW_MODEL_STAGE,
                 )
             )
 
         self.co2_forecaster = (
                 self.mlflow_tracker.load_model_from_registry(
                     model_name=settings.MLFLOW_CO2_MODEL_NAME,
-                    stage_or_alias=settings.MLFLOW_MODEL_STAGE,
+                    alias=settings.MLFLOW_MODEL_STAGE,
                 )
             )         
 
@@ -112,7 +112,13 @@ class PredictorService:
             tg.start_soon(run_price)
             tg.start_soon(run_co2)
 
+
         horizon_steps = request.horizon_hours * 2
+
+        if len(price_preds) < horizon_steps:
+            raise ValueError(
+                f"Model returned {len(price_preds)} predictions, but {horizon_steps} half-hourly steps are required for a {request.horizon_hours}h horizon."
+            )
         last_timestamp = df_history.index[-1]
 
         forecast_points = []

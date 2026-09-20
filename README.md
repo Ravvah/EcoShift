@@ -1,6 +1,6 @@
 # EcoShift - Decision Science Lab
 
-![alt text](image.png)
+![alt text](problem_framing/image.png)
 
 ---
 

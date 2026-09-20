@@ -18,7 +18,9 @@ class OptimizationStatus(str, Enum):
     SUCCESS = "success"
     INFEASIBLE = "infeasible"
     ITERATION_LIMIT = "iteration_limit"
+    UNBOUNDED = "unbounded"
     NUMERICAL_DIFFICULTY = "numerical_difficulty"
+    OTHER_ERROR = "other_error"
 
 class SolverName(str, Enum):
     SCIPY_HIGHS = "scipy_highs"

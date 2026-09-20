@@ -26,7 +26,7 @@ class Tuner:
             forecaster = EnergyForecaster(target_col=target_col, model=model)
             cv_report = self.trainer.cross_validate(df, forecaster)
 
-            # rmse is better for optimizer service allocation than mae
+            # rmse is maybe more appropriate for optimizer service allocation than mae ?
             rmse = cv_report.mean_metrics["rmse"]
             wape = cv_report.mean_metrics["wape"]
             # mae = cv_report.mean_metrics["mae"]

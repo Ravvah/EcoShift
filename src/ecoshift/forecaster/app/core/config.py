@@ -26,7 +26,8 @@ class Settings(BaseSettings):
     MLFLOW_CO2_MODEL_NAME: str = "forecaster_co2_model"
     MLFLOW_MODEL_STAGE: str = "staging"  
 
-    MINIMUM_HISTORY_POINTS: int = Field(default=336, description="Minimum number of hours to do a prediction")
+    MINIMUM_HISTORY_POINTS: int = Field(default=384, description="Minimum number of hours to do a prediction")
+    DEFAULT_FORECASTING_HORIZON: int = 48
 
     ALLOWED_HOSTS: List[str] = Field(default=["*"], description="Origin list authorized for HTTP requests")
 

@@ -14,9 +14,10 @@ from ecoshift.forecaster.features.features import FeatureEngineer
 logger = logging.getLogger(__name__)
 
 class EnergyForecaster(BaseEstimator):
-    def __init__(self, target_col: str, model: BaseEstimator, feature_targets: Optional[List[str]] = None):
+    def __init__(self, target_col: str, model: BaseEstimator, horizon_steps: int = 48, feature_targets: Optional[List[str]] = None):
         self.target_col = target_col
         self.model = model
+        self.horizon_steps = horizon_steps
         self.feature_targets = feature_targets or [TARGET_PRICE, TARGET_CO2]
         self.feature_engineer = FeatureEngineer(targets=self.feature_targets)
         
@@ -41,13 +42,14 @@ class EnergyForecaster(BaseEstimator):
         check_is_fitted(self, attributes=["feature_names_in_"])
 
         df_features = self.feature_engineer.transform(df)
-        df_clean = df_features.dropna()
-        if df_clean.empty:
-            raise ValueError("Given history is not valid")
 
-        X_test = df_clean.drop(columns=[self.target_col])
+        X_test = df_features.tail(n=self.horizon_steps) # predict n points
 
         X_test = X_test[self.feature_names_in_]
+
+        if X_test.isnull().any().any():
+            raise ValueError("Insufficient historical points. Provide at least 384 historical points")
+
         return self.model.predict(X_test)
 
     def save(self, path_str: str) -> None:

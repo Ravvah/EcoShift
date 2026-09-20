@@ -9,7 +9,6 @@ import anyio
 from ecoshift.forecaster.app.schemas.request import PredictionRequest
 from ecoshift.forecaster.app.schemas.response import ForecastDataPoint, PredictResponse
 from ecoshift.forecaster.app.core.config import settings
-from ecoshift.forecaster.model.forecaster import EnergyForecaster
 from ecoshift.forecaster.tracking.mlflow_tracker import MLflowTracker
 
 logger = logging.getLogger(__name__)
@@ -113,16 +112,14 @@ class PredictorService:
             tg.start_soon(run_co2)
 
 
-        horizon_steps = request.horizon_hours * 2
-
-        if len(price_preds) < horizon_steps:
+        if len(price_preds) < request.horizon_hours:
             raise ValueError(
-                f"Model returned {len(price_preds)} predictions, but {horizon_steps} half-hourly steps are required for a {request.horizon_hours}h horizon."
+                f"Model returned {len(price_preds)} predictions, but {request.horizon_hours} half-hourly steps are required."
             )
         last_timestamp = df_history.index[-1]
 
         forecast_points = []
-        for step in range(1, horizon_steps + 1):
+        for step in range(1, request.horizon_hours + 1):
             future_timestamp = last_timestamp + timedelta(minutes=30 * step)
 
             forecast_points.append(

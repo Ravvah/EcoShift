@@ -22,7 +22,7 @@ class CrossValidationReport:
 
 class Trainer:
 
-    def __init__(self, n_folds: int, test_size: int, lookback_steps: int = 336, quantiles: List[float] = None):
+    def __init__(self, n_folds: int, test_size: int, lookback_steps: int = 384, quantiles: List[float] = None):
         self.n_folds = n_folds
         self.test_size = test_size
         self.lookback_steps = lookback_steps

@@ -1,4 +1,4 @@
-# EcoShift - Decision Science Lab
+# EcoShift - Decision Science Lab (Not Finished)
 
 ![alt text](problem_framing/image.png)
 

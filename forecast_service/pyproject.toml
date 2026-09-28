@@ -1,0 +1,29 @@
+[project]
+name = "forecast-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "gunicorn>=26.1.0",
+    "holidays>=0.103",
+    "httpx>=0.28.1",
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.0",
+    "mlflow>=1.27.0",
+    "nbformat>=5.10.4",
+    "numpy>=2.5.0",
+    "optuna>=4.9.0",
+    "pandas>=3.0.3",
+    "pandera>=0.32.1",
+    "plotly>=6.8.0",
+    "pyarrow>=24.0.0",
+    "pydantic-settings>=2.15.0",
+    "scikit-learn>=1.9.0",
+    "statsmodels>=0.14.6",
+    "uvicorn>=0.52.4",
+    "protobuf<4.0.0",
+]
+[tool.setuptools.packages.find]
+where = ["src"]

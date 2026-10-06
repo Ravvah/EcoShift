@@ -39,9 +39,6 @@ class Trainer:
         }
 
 
-
-
-
     def cross_validate(
         self, df: pd.DataFrame, forecaster: EnergyForecaster
     ) -> CrossValidationReport:
@@ -49,38 +46,22 @@ class Trainer:
         horizon_steps = forecaster.horizon_steps
         model_name = forecaster.model.__class__.__name__
 
-        df = forecaster._construct_multi_output_target(df)
-        df = df.dropna()
+        df = forecaster.construct_multi_output_target(df)
 
-        #to refactor, moved X and y to energy forecaster class for Single Responsability Design 
+        X, y = forecaster.prepare_data(df)
 
-        gap_window_size = int(max(LAGS_30MIN, ROLLING_WINDOWS_30MIN) + 1) # add gap ? 
-        tscv = TimeSeriesSplit(n_splits=self.n_folds, test_size=self.test_size, 
-                            #    gap=gap_window_size 
-                               )
+        tscv = TimeSeriesSplit(n_splits=self.n_folds, test_size=self.test_size)
         fold_reports = []
         for fold, (train_idx, val_idx) in enumerate(tscv.split(df)):
             X_train, X_test = X[train_idx], X[val_idx]
             y_train, y_test = y[train_idx], y[val_idx]
 
             fold_forecaster = forecaster.clone()
-            fold_forecaster.fit(X_train)
+            fold_forecaster.fit(X_train, y_train)
 
-            fold_forecaster.predict(X_test)
+            y_test_pred = fold_forecaster.predict(X_test)
 
-            # lookback_df = train_df.iloc[-self.lookback_steps :] # lookback useful to calculate first validation features
-
-            # predict_input_df = pd.concat([lookback_df, val_df])
-
-            predict_input_df = val_df.iloc[-fold_forecaster.horizon_steps :]
-
-            y_val_pred = fold_forecaster.predict(predict_input_df)
-
-            # y_val_pred = y_pred_all[-len(val_df) :]
-            
-            y_val_true = val_df[target_column_name].values
-
-            report = self.evaluator.evaluate(y_val_true, y_val_pred)
+            report = self.evaluator.evaluate(y_test, y_test_pred)
             fold_reports.append(report)
 
             logger.info(

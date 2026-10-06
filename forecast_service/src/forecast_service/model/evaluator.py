@@ -47,20 +47,18 @@ class Evaluator:
         return float(np.mean(np.sign(diff_true) == np.sign(diff_pred)) * 100)
 
     
-    def evaluate(self, y_true: pd.Series, y_pred: np.ndarray) -> EvaluatorReport:
-        y_true_arr = np.asarray(y_true, dtype=np.float64)
+    def evaluate(self, y_true: np.ndarray, y_pred: np.ndarray) -> EvaluatorReport:
+        if len(y_true) != len(y_pred):
+            raise ValueError(f"Mismatched y lengths : y_true '{len(y_true)} and y_pred ({len(y_pred)})" )
 
-        if len(y_true_arr) != len(y_pred):
-            raise ValueError(f"Mismatched y lengths : y_true '{len(y_true_arr)} and y_pred ({len(y_pred)})" )
+        mae_val = mean_absolute_error(y_true, y_pred)
+        rmse_val = root_mean_squared_error(y_true, y_pred)
 
-        mae_val = mean_absolute_error(y_true_arr, y_pred)
-        rmse_val = root_mean_squared_error(y_true_arr, y_pred)
-
-        wape_val = self._compute_wape(y_true_arr, y_pred)
-        da_val = self._compute_directional_accuracy(y_true_arr, y_pred)
+        wape_val = self._compute_wape(y_true, y_pred)
+        da_val = self._compute_directional_accuracy(y_true, y_pred)
 
         pinball_dict = {
-            f"pinball__q_{int(q * 100)}": round(float(mean_pinball_loss(y_true_arr, y_pred, alpha=q)), 4) for q in self.quantiles
+            f"pinball__q_{int(q * 100)}": round(float(mean_pinball_loss(y_true, y_pred, alpha=q)), 4) for q in self.quantiles
         }
 
         return EvaluatorReport(
